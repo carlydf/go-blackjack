@@ -98,7 +98,7 @@ func hit(p *Player) bool {
 	p.PrintHand()
 	s1, _ := p.ScoreHand()
 	if s1 > 21 {
-		fmt.Printf("%v busted with score %v :(\n", p.Name, s1)
+		fmt.Printf("%v busted with score %v\n", p.Name, s1)
 		return true
 	}
 	return false
