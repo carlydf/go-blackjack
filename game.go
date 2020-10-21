@@ -7,7 +7,7 @@ import (
 
 // i read that global vars are problematic, but idk why
 // could replace this with a struct, but that seemed unnecessary
-var players []Player // dealing order matters
+var players []*Player // dealing order matters
 var dk deck.Deck
 var dealToNext int
 
@@ -15,7 +15,7 @@ func StartGame() {
 	fmt.Println("Starting game...")
 	names := []string{"me", "dealer"} // dealer must be last
 	for _, n := range names {
-		players = append(players, Player{Name: n})
+		players = append(players, &Player{Name: n})
 	}
 	dk = deck.New(deck.WithShuffle())
 	dealToNext = 0
@@ -28,7 +28,9 @@ func deal(numCards int) {
 		for j, _ := range players {
 			p := players[(dealToNext + j) % len(players)]
 			fmt.Printf("appending to player %v(%v)\n", p.Name, j)
-			p.Hand = append(p.Hand, draw()) // this is not working
+			//fmt.Println(hand)
+			p.Draw(draw())
+			//p.Hand = append(p.Hand, draw()) // this is not working
 		}
 	}
 	dealToNext = (dealToNext + 1) % len(players)

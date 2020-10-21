@@ -11,11 +11,14 @@ type Player struct {
 }
 
 func (p Player) String() string {
-	s := fmt.Sprintf("%v: %v", p.Name, len(p.Hand))
+	s := fmt.Sprintf("%v:", p.Name)
 	for _, c := range p.Hand {
-		s += fmt.Sprintf("poop")
 		s += fmt.Sprintf("%v, ", c)
 	}
 	s += "\n"
 	return s
+}
+
+func (p *Player) Draw(c deck.Card) {
+	p.Hand = append(p.Hand, c)
 }
