@@ -25,6 +25,16 @@ func (p Player) String() string {
 	return s
 }
 
+func (p Player) PrintHand() {
+	for i, c := range p.Hand {
+		if p.Dealer && i == 0 {
+			fmt.Print("   hidden card\n")
+		} else {
+			fmt.Printf("   %v\n", c)
+		}
+	}
+}
+
 func (p *Player) Draw(c deck.Card) {
 	p.Hand = append(p.Hand, c)
 }

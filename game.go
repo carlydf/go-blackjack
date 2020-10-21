@@ -72,8 +72,6 @@ func TakeTurn() {
 		}
 		TakeTurn()
 	}
-	whoseTurn = (whoseTurn + 1) % len(players)
-	return
 }
 
 func DealerTurn(p *Player) {
@@ -97,7 +95,7 @@ func DealerTurn(p *Player) {
 func hit(p *Player) bool {
 	p.Draw(draw())
 	fmt.Printf("   %v's hand is now:\n", p.Name)
-	fmt.Print(p)
+	p.PrintHand()
 	s1, _ := p.ScoreHand()
 	if s1 > 21 {
 		fmt.Printf("%v busted with score %v :(\n", p.Name, s1)
@@ -109,6 +107,7 @@ func hit(p *Player) bool {
 func stand() {
 	whoseTurn = (whoseTurn + 1) % len(players)
 	fmt.Print("   Turn over.\n\n")
+	return
 }
 
 func CheckScores() (noBusts bool, winner *Player) {
