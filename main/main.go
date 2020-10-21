@@ -6,5 +6,6 @@ import (
 
 func main() {
 	blackjack.StartGame()
+	//blackjack.PrintFullStatus()
 	blackjack.PrintStatus()
 }

@@ -12,11 +12,13 @@ var dk deck.Deck
 var dealToNext int
 
 func StartGame() {
-	fmt.Println("Starting game...")
-	names := []string{"me", "dealer"} // dealer must be last
+	fmt.Print("Starting game...\n")
+	names := []string{"me"}
 	for _, n := range names {
-		players = append(players, &Player{Name: n})
+		players = append(players, &Player{Name: n, Dealer: false})
 	}
+	// dealer must be last
+	players = append(players, &Player{Name: "dealer", Dealer: true})
 	dk = deck.New(deck.WithShuffle())
 	dealToNext = 0
 	deal(2)
@@ -27,10 +29,7 @@ func deal(numCards int) {
 	for i := 0; i < numCards; i++ {
 		for j, _ := range players {
 			p := players[(dealToNext + j) % len(players)]
-			fmt.Printf("appending to player %v(%v)\n", p.Name, j)
-			//fmt.Println(hand)
 			p.Draw(draw())
-			//p.Hand = append(p.Hand, draw()) // this is not working
 		}
 	}
 	dealToNext = (dealToNext + 1) % len(players)
@@ -42,12 +41,19 @@ func draw() deck.Card {
 	return c
 }
 
-func PrintStatus() {
-	fmt.Println("### GAME STATUS ###")
+func PrintFullStatus() {
+	fmt.Println("### GAME STATUS (FULL/DEBUG) ###")
 	fmt.Printf("Cards in deck: %v\n", len(dk))
 	fmt.Printf("Deal to next: %v(%v)\n", players[dealToNext].Name, dealToNext)
 	fmt.Println("List of players:")
 	for _, p := range players {
 		fmt.Print(p)
+	}
+}
+
+func PrintStatus() {
+	fmt.Println("### GAME STATUS ###")
+	for _, p := range players {
+			fmt.Print(p)
 	}
 }
