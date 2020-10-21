@@ -8,4 +8,5 @@ func main() {
 	blackjack.StartGame()
 	//blackjack.PrintFullStatus()
 	blackjack.PrintStatus()
+	blackjack.TakeTurn()
 }
