@@ -3,8 +3,6 @@ package blackjack
 import (
 	"fmt"
 	"github.com/gophercises/deck"
-	"bufio"
-	"os"
 )
 
 // i read that global vars are problematic, but idk why
@@ -17,12 +15,17 @@ var roundNum int
 
 func StartGame() {
 	fmt.Print("Starting game...\n")
-	names := []string{"me"}
+	fmt.Print("Enter your name: ")
+	var name string
+	fmt.Scanln(&name)
+	names := []string{name} // change for multiplayer
 	for _, n := range names {
 		players = append(players, &Player{Name: n, Dealer: false})
 	}
 	// dealer must be last
-	players = append(players, &Player{Name: "dealer", Dealer: true})
+	players = append(players, &Player{Name: "Dealer", Dealer: true})
+	dk = deck.New(deck.WithShuffle())
+	dk = deck.New(deck.WithShuffle()) // added because shuffle wasnt working?
 	dk = deck.New(deck.WithShuffle())
 	dealToNext = 0
 	deal(2)
@@ -47,41 +50,88 @@ func draw() deck.Card {
 
 func TakeTurn() {
 	p := players[whoseTurn]
+	fmt.Printf("%v's turn!\n", p.Name)
 	if p.Dealer {
-		DealerTurn()
+		DealerTurn(p)
 		return
 	}
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Your turn!\n")
 	fmt.Print("   Enter H to hit or S to stand: ")
-	choice, _ := reader.ReadString('\n')
-	fmt.Print("   You chose " + choice + ".\n")
-	if choice == "S" {
-		whoseTurn = (whoseTurn + 1) % len(players)
-		fmt.Print("   Turn over.")
-	} else if choice == "H" {
-		p.Draw(draw())
-		fmt.Print("   Your hand is now:\n")
-		fmt.Print(p)
+	var choice string
+	fmt.Scanln(&choice)
+	fmt.Printf("   %v chose " + choice + ".\n", p.Name)
+	switch choice {
+	case "S":
+		stand()
+		return
+	case "H":
+		busted := hit(p)
+		if busted {
+			fmt.Print("Game over! The winner is...") // change this for multiplayer
+			fmt.Print(players[len(players) - 1]) // dealer is always last
+			return
+		}
 		TakeTurn()
+	}
+	whoseTurn = (whoseTurn + 1) % len(players)
+	return
+}
+
+func DealerTurn(p *Player) {
+	// In our second iteration the dealer will play with typical dealer rules -
+	// if they have a score of 16 or less, or a soft 17, they will hit.
+	s1, s11 := p.ScoreHand()
+	if (s11 == 17 && s1 < 17) || s1 <= 16 || s11 <= 16 { // i think s11 <= 16 is redundant
+		fmt.Printf("   %v chose H.\n", p.Name)
+		busted := hit(p)
+		if busted {
+			fmt.Print("Game over! The dealer lost.\n")
+			return
+		}
+	} else {
+		fmt.Printf("   %v chose S.\n", p.Name)
+		stand()
+		roundNum++
 	}
 }
 
-func DealerTurn() {
-	// In the first iteration our dealer won't do anything,
-	// and will just display their hand. After that the game will end.
+func hit(p *Player) bool {
+	p.Draw(draw())
+	fmt.Printf("   %v's hand is now:\n", p.Name)
+	fmt.Print(p)
+	s1, _ := p.ScoreHand()
+	if s1 > 21 {
+		fmt.Printf("%v busted with score %v :(\n", p.Name, s1)
+		return true
+	}
+	return false
+}
 
-	// In our second iteration the dealer will play with typical dealer rules -
-	// if they have a score of 16 or less, or a soft 17, they will hit.
-	// This means we will need to implement scoring, and will be able to
-	// determine which player has won the game.
+func stand() {
+	whoseTurn = (whoseTurn + 1) % len(players)
+	fmt.Print("   Turn over.\n\n")
+}
+
+func CheckScores() (noBusts bool, winner *Player) {
+	noBusts, winner = true, nil
+	for _, p := range players {
+		s1, s11 := p.ScoreHand()
+		// check for blackjack
+		if roundNum == 0 && s11 == 21 {
+			winner = p
+		}
+		if s1 > 21 {
+			noBusts = false
+		}
+	}
+	return noBusts, winner
 }
 
 func PrintStatus() {
-	fmt.Println("### GAME STATUS ###")
+	fmt.Print("### GAME STATUS ###\n")
 	for _, p := range players {
 			fmt.Print(p)
 	}
+	fmt.Print("##################\n\n")
 }
 
 func PrintFullStatus() {
